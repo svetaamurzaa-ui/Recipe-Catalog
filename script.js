@@ -9,7 +9,6 @@ document.addEventListener("DOMContentLoaded", () => {
     
     let currentFilter = "all"; 
 
-    // Головна функція фільтрації (Категорії + Лайки)
     function applyFilters() {
         let showingLikedOnly = headerLikeBtn && headerLikeBtn.classList.contains('liked');
         cards.forEach(card => {
@@ -26,7 +25,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Обробка лайків на картках
     likeButtons.forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
@@ -36,7 +34,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // Фільтр улюблених рецептів (у шапці)
     if (headerLikeBtn) {
         headerLikeBtn.addEventListener('click', function(e) {
             e.preventDefault();
@@ -45,7 +42,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Логіка модальних вікон (Профіль та Історія)
     const authModal = document.getElementById("authModal");
     const closeAuthModal = document.getElementById("closeAuthModal");
     const historyModal = document.getElementById("historyModal");
@@ -84,16 +80,14 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Збереження переглянутих рецептів у LocalStorage
     function saveToHistory(recipe) {
         let history = JSON.parse(localStorage.getItem('graziaHistory')) || [];
-        history = history.filter(item => item.title !== recipe.title); // Видаляємо дублікати
-        history.unshift(recipe); // Додаємо на початок
-        if (history.length > 5) history.pop(); // Зберігаємо лише 5 останніх
+        history = history.filter(item => item.title !== recipe.title); 
+        history.unshift(recipe); 
+        if (history.length > 5) history.pop(); 
         localStorage.setItem('graziaHistory', JSON.stringify(history));
     }
 
-    // Відображення історії переглядів
     function renderHistory() {
         const historyList = document.getElementById('historyList');
         let history = JSON.parse(localStorage.getItem('graziaHistory')) || [];
@@ -111,7 +105,6 @@ document.addEventListener("DOMContentLoaded", () => {
         `).join('');
     }
 
-    // Відкриття картки рецепту
     const recipeModal = document.getElementById("recipeModal");
     const closeRecipeModal = document.getElementById("closeRecipeModal");
     const modalImg = document.getElementById("modalRecipeImg");
@@ -135,7 +128,6 @@ document.addEventListener("DOMContentLoaded", () => {
             modalTag.textContent = card.querySelector(".recipe-tag").textContent;
             modalTimeText.textContent = card.querySelector(".recipe-meta").textContent;
 
-            // Тимчасовий контент (до підключення JSON)
             modalIngredients.innerHTML = `
                 <li><span>Томати чері</span> <span>150 г</span></li>
                 <li><span>Оливкова олія</span> <span>2 ст. л.</span></li>
@@ -155,7 +147,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Закриття модальних вікон при кліку на темний фон
     window.addEventListener("click", (e) => {
         if (e.target === recipeModal) {
             recipeModal.style.display = "none";
@@ -173,7 +164,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Обробка кліків по категоріях
     const cleanText = (text) => text.trim().toLowerCase().replace(" ▼", "").replace(" ♡", "");
 
     filterLinks.forEach(link => {
@@ -225,7 +215,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // Перемикач Увійти/Зареєструватися
     const toggleAuthMode = document.getElementById("toggleAuthMode");
     const authTitle = document.getElementById("authTitle");
     const authSubmitBtn = document.getElementById("authSubmitBtn");
