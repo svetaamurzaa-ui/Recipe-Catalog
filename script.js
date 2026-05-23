@@ -142,7 +142,21 @@
         ].join(' '));
     }
 
-    function getFilterKey(rawText) {
+function getFilterKey(rawText) {
+        const text = (rawText || '').toLowerCase().trim();
+        
+        if (text.includes('святков')) return 'holiday';
+        if (text.includes('сезонн')) return 'seasonal';
+        if (text.includes('швидк')) return 'quickDinner';
+        if (text.includes('світ')) return 'worldCuisine';
+        
+        if (text.includes('всі')) return 'all';
+        if (text.includes('веган')) return 'vegan';
+        if (text.includes('безглют')) return 'glutenFree';
+        if (text.includes('безлакт')) return 'lactoseFree';
+        if (text.includes('низькокал')) return 'lowCalorie';
+        if (text.includes('здоров')) return 'healthyMenu';
+        
         const normalized = normalizeText(rawText.replace('▼', '').trim());
         return filterKeyMap[normalized] || normalized;
     }
@@ -395,18 +409,18 @@
         if (filterKey === 'collections') {
             return filterRecipe(recipe, 'holiday') || filterRecipe(recipe, 'seasonal') || filterRecipe(recipe, 'quickDinner') || filterRecipe(recipe, 'worldCuisine');
         }
-        if (filterKey === 'holiday') {
-            return containsAny(titleSource, ['holiday', 'festive', 'christmas', 'easter', 'celebration']);
+if (filterKey === 'holiday') {
+            return containsAny(searchSource, ['holiday', 'festive', 'christmas', 'thanksgiving', 'easter', 'celebration', 'святков', 'різдвян']);
         }
         if (filterKey === 'seasonal') {
-            return containsAny(titleSource, ['seasonal', 'summer', 'winter', 'autumn', 'spring', 'fall']);
+            return containsAny(searchSource, ['seasonal', 'summer', 'winter', 'autumn', 'spring', 'fall', 'сезонн', 'літн', 'зимн']);
         }
         if (filterKey === 'quickDinner') {
             const isDinnerLikeCategory = category === 'основні страви' || category === 'перші страви' || category === 'салати' || category === 'закуски';
-            return containsAny(titleSource, ['quick', 'easy', 'fast', '30 min', 'ready in']) || (isDinnerLikeCategory && (recipe.total_time || 0) > 0 && (recipe.total_time || 0) <= 30);
+            return containsAny(searchSource, ['quick', 'easy', 'fast', '30 min', 'ready in', 'швидк', 'прост']) || (isDinnerLikeCategory && (recipe.prep_time || 0) <= 30);
         }
         if (filterKey === 'worldCuisine') {
-            return containsAny(titleSource, ['indian', 'italian', 'mexican', 'japanese', 'thai', 'middle eastern', 'spanish', 'french', 'world']);
+            return containsAny(searchSource, ['indian', 'italian', 'mexican', 'japanese', 'thai', 'asian', 'french', 'world', 'кухня']);
         }
         if (strictCategoryFilters.has(filterKey)) {
             return category === filterKey;
@@ -480,7 +494,7 @@
 
     async function loadRecipes() {
         try {
-            const response = await fetch('/api/recipes?limit=100');
+            const response = await fetch('global_recipes_database.json');
             recipes = await response.json();
         } catch (error) {
             recipes = [];
