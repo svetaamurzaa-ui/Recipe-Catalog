@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор ваги | GraziaRecipe</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="container header-inner">
+            <a href="index.html" class="logo-wrapper">
+                <span class="logo">GraziaRecipe</span>
+                <span class="logo-subtitle">Калькулятор ваги</span>
+            </a>
+            <a href="index.html" class="button-link-back">На головну</a>
+        </div>
+    </header>
+    <main class="container">
+        <section class="hero">
+            <div class="hero-banner calculator-hero">
+                <div class="hero-image-side side-left"></div>
+                <div class="hero-glass-box calculator-box">
+                    <h1>Калькулятор ваги інгредієнтів</h1>
+                    <p>Введіть об'єм у мілілітрах і оберіть інгредієнт для швидкого перерахунку у грами.</p>
+                    <div class="calculator-fields">
+                        <label for="volume-input">Об'єм, мл</label>
+                        <input id="volume-input" type="number" min="0" placeholder="Наприклад, 100">
+
+                        <label for="ingredient-select">Інгредієнт</label>
+                        <select id="ingredient-select">
+                            <option value="вода">Вода</option>
+                            <option value="молоко цільне">Молоко цільне</option>
+                            <option value="йогурт (класичний)">Йогурт</option>
+                            <option value="вершки (рідкі)">Вершки</option>
+                            <option value="олія рослинна">Олія</option>
+                            <option value="мед (рідкий)">Мед</option>
+                            <option value="цукор">Цукор</option>
+                            <option value="борошно пшеничне">Борошно</option>
+                            <option value="сметана">Сметана</option>
+                            <option value="томатна паста">Томатна паста</option>
+                        </select>
+
+                        <button id="calc-button" class="search-btn">Розрахувати</button>
+                    </div>
+                    <div id="result-text" class="calculator-result">Результат з'явиться тут.</div>
+                </div>
+                <div class="hero-image-side side-right"></div>
+            </div>
+        </section>
+    </main>
+
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
