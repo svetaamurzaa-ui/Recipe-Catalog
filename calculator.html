@@ -19,6 +19,7 @@
             <a href="index.html" class="button-link-back">На головну</a>
         </div>
     </header>
+
     <main class="container">
         <section class="hero">
             <div class="hero-banner calculator-hero">
@@ -26,27 +27,50 @@
                 <div class="hero-glass-box calculator-box">
                     <h1>Калькулятор ваги інгредієнтів</h1>
                     <p>Введіть об'єм у мілілітрах і оберіть інгредієнт для швидкого перерахунку у грами.</p>
+                    
                     <div class="calculator-fields">
                         <label for="volume-input">Об'єм, мл</label>
                         <input id="volume-input" type="number" min="0" placeholder="Наприклад, 100">
 
                         <label for="ingredient-select">Інгредієнт</label>
                         <select id="ingredient-select">
+                            <option value="борошно кукурудзяне">Борошно кукурудзяне</option>
+                            <option value="борошно пшеничне">Борошно пшеничне</option>
+                            <option value="варення">Варення</option>
+                            <option value="вершки (рідкі)">Вершки (рідкі)</option>
+                            <option value="вершкове масло (розтоплене)">Вершкове масло (розтоплене)</option>
+                            <option value="вівсяні пластівце">Вівсяні пластівці</option>
                             <option value="вода">Вода</option>
+                            <option value="горіхи (мелені)">Горіхи (мелені)</option>
+                            <option value="гречка">Гречка</option>
+                            <option value="згущене молоко">Згущене молоко</option>
+                            <option value="йогурт (класичний)">Йогурт (класичний)</option>
+                            <option value="какао-порошок">Какао-порошок</option>
+                            <option value="кефір">Кефір</option>
+                            <option value="крохмаль">Крохмаль</option>
+                            <option value="майонез">Майонез</option>
+                            <option value="манна крупа">Манна крупа</option>
+                            <option value="мед (рідкий)">Мед (рідкий)</option>
                             <option value="молоко цільне">Молоко цільне</option>
-                            <option value="йогурт (класичний)">Йогурт</option>
-                            <option value="вершки (рідкі)">Вершки</option>
-                            <option value="олія рослинна">Олія</option>
-                            <option value="мед (рідкий)">Мед</option>
-                            <option value="цукор">Цукор</option>
-                            <option value="борошно пшеничне">Борошно</option>
+                            <option value="олія рослинна">Олія рослинна</option>
+                            <option value="оцет">Оцет</option>
+                            <option value="пшоно">Пшоно</option>
+                            <option value="рис">Рис</option>
+                            <option value="родзинки">Родзинки</option>
+                            <option value="сир кисломолочний (творог)">Сир кисломолочний (творог)</option>
+                            <option value="сир твердий (тертий)">Сир твердий (тертий)</option>
+                            <option value="сіль (кухонна)">Сіль (кухонна)</option>
                             <option value="сметана">Сметана</option>
+                            <option value="сухарі панірувальні">Сухарі панірувальні</option>
                             <option value="томатна паста">Томатна паста</option>
+                            <option value="цукор">Цукор</option>
+                            <option value="цукрова пудра">Цукрова пудра</option>
                         </select>
 
-                        <button id="calc-button" class="search-btn">Розрахувати</button>
+                        <button id="calc-button" class="search-btn">Порахувати</button>
                     </div>
-                    <div id="result-text" class="calculator-result">Результат з'явиться тут.</div>
+                    
+                    <div id="result-text" class="calculator-result">Результат: 0 г</div>
                 </div>
                 <div class="hero-image-side side-right"></div>
             </div>
