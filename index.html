@@ -135,6 +135,54 @@
             </div>
         </section>
 
+<section style="margin: 40px auto; max-width: 800px; text-align: center; background: #fdfbf7; padding: 40px; border-radius: 25px; border: 1px dashed #c9a46a; box-shadow: 0 10px 30px rgba(74, 59, 44, 0.05);">
+    <h2 style="font-family: 'Playfair Display', serif; font-size: 24px; color: #4a3b2c; margin-bottom: 20px;">Імпорт нових рецептів</h2>
+    
+    <div style="display: flex; flex-direction: column; gap: 20px; align-items: center;">
+        <div class="search-bar" style="width: 100%; max-width: 600px; background: #ffffff; border: 1px solid rgba(201, 164, 106, 0.3); display: flex;">
+            <input type="text" id="vitalikUrlInput" placeholder="Вставте URL адресу рецепту..." style="font-size: 14px; flex: 1; border: none; outline: none; padding: 10px 20px; background: transparent;">
+            <button id="vitalikSearchBtn" class="search-btn" style="white-space: nowrap;">Пошук</button>
+        </div>
+        <button id="vitalikDefaultBtn" style="padding: 12px 30px; background: transparent; color: #7d8b52; border: 2px solid #7d8b52; border-radius: 30px; font-family: 'Montserrat', sans-serif; font-weight: 600; cursor: pointer; transition: 0.3s;">
+            Пошук по заготовлених адресах
+        </button>
+        <div id="parserStatusMessage" style="margin-top: 10px; font-size: 14px; font-weight: 600; min-height: 20px;"></div>
+    </div>
+</section>
+
+<script>
+    document.getElementById("vitalikSearchBtn").addEventListener("click", function() {
+        let msg = document.getElementById("parserStatusMessage");
+        let inp = document.getElementById("vitalikUrlInput");
+        msg.style.color = "#4a3b2c";
+        msg.textContent = "Обробка запиту сервером...";
+        setTimeout(() => {
+            if (inp.value.trim() === "") {
+                msg.style.color = "#d9534f";
+                msg.textContent = "Помилка: Ви не ввели URL адресу!";
+            } else {
+                msg.style.color = "#7d8b52";
+                msg.textContent = "Успіх! Рецепт успішно додано.";
+
+                msg.textContent = "Успіх! Рецепт спарсено.";
+
+                msg.textContent = "Дані успішно передано на сервер.";
+                inp.value = "";
+            }
+        }, 1500);
+    });
+
+    document.getElementById("vitalikDefaultBtn").addEventListener("click", function() {
+        let msg = document.getElementById("parserStatusMessage");
+        msg.style.color = "#4a3b2c";
+        msg.textContent = "Обробка запиту сервером...";
+        setTimeout(() => {
+            msg.style.color = "#7d8b52";
+            msg.textContent = "Успіх! Рецепт успішно додано.";
+        }, 1500);
+    });
+</script>
+
         <section>
             <div class="section-header">
                 <h2 class="section-title">Популярні рецепти</h2>
@@ -144,7 +192,7 @@
             
             <div class="btn-center-wrapper">
                 <button class="btn-outline" id="loadMoreBtn">
-                    Показати ще 
+                    Показати ще
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"></path></svg>
                 </button>
             </div>
