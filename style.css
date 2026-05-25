@@ -1155,3 +1155,74 @@ a.recipe-card {
     color: var(--text-dark);
     line-height: 1.3;
 }
+.recipe-card-new {
+    display: flex;
+    flex-direction: column;
+    background: var(--white);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid rgba(201, 164, 106, 0.4);
+    box-shadow: var(--shadow-soft);
+    height: 100%;
+    transition: var(--transition-smooth);
+}
+.recipe-card-new:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-float);
+}
+.recipe-card-top {
+    flex: 1;
+    padding: 30px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+.recipe-card-top h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    color: var(--text-dark);
+}
+.recipe-card-bottom {
+    display: flex;
+    gap: 10px;
+    padding: 15px;
+    background: var(--bg-secondary);
+    border-top: 1px solid rgba(201, 164, 106, 0.2);
+}
+.card-btn {
+    flex: 1;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    font-size: 12px;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+}
+.btn-delete { background: #e74c3c; color: white; }
+.btn-delete:hover { background: #c0392b; }
+.btn-open { background: var(--accent-olive); color: white; }
+.btn-open:hover { background: var(--accent-olive-hover); }
+
+.grazia-slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 6px;
+    background: rgba(201, 164, 106, 0.3);
+    border-radius: 10px;
+    outline: none;
+}
+.grazia-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--accent-olive);
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(125, 139, 82, 0.4);
+    transition: var(--transition-smooth);
+}
+.grazia-slider::-webkit-slider-thumb:hover { transform: scale(1.15); }

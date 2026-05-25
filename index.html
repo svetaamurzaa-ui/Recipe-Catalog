@@ -61,9 +61,8 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                 </button>
 
-                <button class="icon-btn" id="profileBtn" title="Особистий кабінет">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                </button>
+                <button class="icon-btn" id="profileBtn" title="Особистий кабінет" style="display: none;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" ...
                 <button class="mobile-menu-btn">☰</button>
             </div>
         </div>
@@ -85,6 +84,18 @@
                     </div>
                 </div>
             </div>
+            <div class="parser-controls" style="margin-top: 20px; display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; gap: 10px;">
+        <input type="url" id="parse-url-input" placeholder="Додати URL рецепту..." style="flex: 1; padding: 12px 20px; border-radius: 30px; border: 1px solid var(--accent-gold); outline: none; font-family: 'Montserrat', sans-serif;">
+        <button id="parse-url-btn" class="search-btn">Пошук</button>
+    </div>
+    <p id="parse-message" style="color: #e74c3c; font-size: 14px; text-align: center; margin-top: 10px; display: none; font-weight: 600;"></p>
+    
+
+    <button id="parse-predefined-btn" class="btn-outline" style="width: 100%; justify-content: center; background: var(--white);">
+        Завантажити із заготованих адрес
+    </button>
+</div>
         </section>
 
         <section class="categories">
@@ -135,52 +146,8 @@
             </div>
         </section>
 
-<section style="margin: 40px auto; max-width: 800px; text-align: center; background: #fdfbf7; padding: 40px; border-radius: 25px; border: 1px dashed #c9a46a; box-shadow: 0 10px 30px rgba(74, 59, 44, 0.05);">
-    <h2 style="font-family: 'Playfair Display', serif; font-size: 24px; color: #4a3b2c; margin-bottom: 20px;">Імпорт нових рецептів</h2>
-    
-    <div style="display: flex; flex-direction: column; gap: 20px; align-items: center;">
-        <div class="search-bar" style="width: 100%; max-width: 600px; background: #ffffff; border: 1px solid rgba(201, 164, 106, 0.3); display: flex;">
-            <input type="text" id="vitalikUrlInput" placeholder="Вставте URL адресу рецепту..." style="font-size: 14px; flex: 1; border: none; outline: none; padding: 10px 20px; background: transparent;">
-            <button id="vitalikSearchBtn" class="search-btn" style="white-space: nowrap;">Пошук</button>
-        </div>
-        <button id="vitalikDefaultBtn" style="padding: 12px 30px; background: transparent; color: #7d8b52; border: 2px solid #7d8b52; border-radius: 30px; font-family: 'Montserrat', sans-serif; font-weight: 600; cursor: pointer; transition: 0.3s;">
-            Пошук по заготовлених адресах
-        </button>
-        <div id="parserStatusMessage" style="margin-top: 10px; font-size: 14px; font-weight: 600; min-height: 20px;"></div>
-    </div>
-</section>
-
 <script>
-    document.getElementById("vitalikSearchBtn").addEventListener("click", function() {
-        let msg = document.getElementById("parserStatusMessage");
-        let inp = document.getElementById("vitalikUrlInput");
-        msg.style.color = "#4a3b2c";
-        msg.textContent = "Обробка запиту сервером...";
-        setTimeout(() => {
-            if (inp.value.trim() === "") {
-                msg.style.color = "#d9534f";
-                msg.textContent = "Помилка: Ви не ввели URL адресу!";
-            } else {
-                msg.style.color = "#7d8b52";
-                msg.textContent = "Успіх! Рецепт успішно додано.";
-
-                msg.textContent = "Успіх! Рецепт спарсено.";
-
-                msg.textContent = "Дані успішно передано на сервер.";
-                inp.value = "";
-            }
-        }, 1500);
-    });
-
-    document.getElementById("vitalikDefaultBtn").addEventListener("click", function() {
-        let msg = document.getElementById("parserStatusMessage");
-        msg.style.color = "#4a3b2c";
-        msg.textContent = "Обробка запиту сервером...";
-        setTimeout(() => {
-            msg.style.color = "#7d8b52";
-            msg.textContent = "Успіх! Рецепт успішно додано.";
-        }, 1500);
-    });
+    
 </script>
 
         <section>
@@ -228,7 +195,7 @@
                 <button type="submit" class="modal-btn" id="authSubmitBtn">Увійти</button>
             </form>
             <p style="margin-top: 20px; font-size: 12px; color: var(--text-gray);">
-                <span id="authHintText">Немає акаунту?</span> 
+                <span id="authHintText">Немає акаунту?</span>
                 <a href="#" id="toggleAuthMode" style="color: var(--accent-olive); font-weight: 600; text-decoration: none;">Зареєструватися</a>
             </p>
         </div>
@@ -261,14 +228,22 @@
                 </div>
             </div>
 
-            <div class="recipe-modal-body">
-                <h4>Інгредієнти:</h4>
-                <ul id="modalRecipeIngredients"></ul>
-
-                <h4>Покрокове приготування:</h4>
-                <p id="modalRecipeSteps"></p>
-            </div>
+    <div class="recipe-modal-body">
+        <div class="slider-container" style="margin-bottom: 25px; background: var(--bg-secondary); padding: 15px; border-radius: 15px; text-align: center;">
+            <label for="modal-portion-slider" style="display: block; margin-bottom: 10px; font-weight: 700; color: var(--text-dark);">
+                Кількість порцій: <span id="modal-portion-val" style="color: var(--accent-olive); font-size: 20px;">1</span>
+            </label>
+            <input type="range" id="modal-portion-slider" class="grazia-slider" min="1" max="12" value="1">
         </div>
+
+        <h4 style="color: var(--accent-olive); margin-bottom: 15px; font-family: 'Playfair Display', serif; font-size: 20px;">Інгредієнти:</h4>
+        <ul id="modalRecipeIngredients" style="list-style-type: none; margin-bottom: 25px;"></ul>
+
+        <hr style="margin: 25px 0; border: none; border-top: 1px dashed var(--accent-gold); opacity: 0.5;">
+
+        <h4 style="color: var(--accent-olive); margin-bottom: 15px; font-family: 'Playfair Display', serif; font-size: 20px;">Спосіб приготування:</h4>
+        <p id="modalRecipeSteps" style="font-size: 14px; line-height: 1.8; color: var(--text-dark);"></p>
+
     </div>
 
     <script src="script.js"></script>
@@ -276,8 +251,8 @@
     <script type="text/javascript">
     function googleTranslateElementInit() {
         new google.translate.TranslateElement({
-            pageLanguage: 'en', 
-            includedLanguages: 'uk', 
+            pageLanguage: 'en',
+            includedLanguages: 'uk',
             layout: google.translate.TranslateElement.InlineLayout.SIMPLE
         }, 'google_translate_element');
     }

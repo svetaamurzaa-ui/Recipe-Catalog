@@ -1,4 +1,6 @@
 ﻿document.addEventListener("DOMContentLoaded", () => {
+    let globalRecipes = [];
+    let currentRecipe = null;
     const recipesContainer = document.getElementById('recipesContainer');
     const loadMoreBtn = document.getElementById('loadMoreBtn');
     const searchInput = document.querySelector('.search-bar input');
@@ -28,8 +30,11 @@
     const authHintText = document.getElementById('authHintText');
 
     let recipes = [];
-    let displayedCount = 8;
+    let displayedCount =30;
+    let currentActiveRecipe = null;
     let currentFilter = 'all';
+    let likedRecipeTitles = new Set(JSON.parse(localStorage.getItem('graziaLikes') || '[]'));
+    let showLikedOnly = false;
 
     const categoryKeywords = {
         'сніданки': ['breakfast', 'omelette', 'omelet', 'pancake', 'waffle', 'granola', 'oatmeal', 'porridge', 'bagel', 'toast', 'brunch', 'rosti', 'mille feuille'],
@@ -142,7 +147,7 @@
         ].join(' '));
     }
 
-function getFilterKey(rawText) {
+    function getFilterKey(rawText) {
         const text = (rawText || '').toLowerCase().trim();
         
         if (text.includes('святков')) return 'holiday';
@@ -238,57 +243,160 @@ function getFilterKey(rawText) {
     }
 
     function buildRecipeCard(recipe, index) {
-        const category = detectCategory(recipe);
-        const image = recipe.image || categoryImages[category] || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=700';
-        const timeText = `${recipe.prep_time || 0} хв`;
-        const ingredientItems = (recipe.ingredients || []).slice(0, 2).map(item => {
-            const quantity = item.quantity !== null && item.quantity !== undefined ? item.quantity : '';
-            const unit = item.unit ? ` ${item.unit}` : '';
-            return `<li><span>${item.name}</span><span>${quantity}${unit}</span></li>`;
-        }).join('');
+
+        const imageFallback = {
+        "Smoked Salmon and Egg Breakfast Mille-feuille": "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=700", // Сьомга
+        "Middle Eastern Roasted Eggplant with Couscous": "https://media.istockphoto.com/id/2233296510/photo/stuffed-eggplant-with-couscous.webp?a=1&b=1&s=612x612&w=0&k=20&c=FaEbKo2_oIc-GJ4ZCrtV5KFBY-hAzgTTz8XN-iM1Cgg=", // Баклажан
+        "Chorizo & Kale Risotto": "https://images.unsplash.com/photo-1575401449875-b695a38ef896?q=80&w=1010&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", // Різотто
+        "Ultra Crispy Smashed Potatoes": "https://images.unsplash.com/photo-1633959639799-6d3f66e05710?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", // Картопля
+        "Cheese and Bacon Potato Skins": "https://images.unsplash.com/photo-1595955538897-d3c8ec58efe2?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", // Шкірки картоплі
+        "One Pot Chicken Enchilada Rice Casserole": "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=700", // Запіканка
+        "Smoked Salmon Potato Rosti Stack": "https://plus.unsplash.com/premium_photo-1697032903231-b9c702d816f5?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", // Рості з лососем
+        "Mexican Shredded Beef (and Tacos)": "https://plus.unsplash.com/premium_photo-1661730329741-b3bf77019b39?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", // Тако
+        "Hawaiian Chicken Salad": "https://plus.unsplash.com/premium_photo-1695399566183-df3e7778e198?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", // Салат з куркою
+        "Glazed Stovetop Carrots": "https://images.unsplash.com/photo-1636743716922-1884c23fb6f6?q=80&w=685&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", // Морква
+        "Smoked Trout Dip / Potted Smoked Trout (le Budget le Gourmet)": "https://images.unsplash.com/photo-1695605302524-e6dd509cb170?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", // Форель
+        "Slow-Roasted Crispy Pork Belly": "https://images.unsplash.com/photo-1625477811233-044633d10dd1?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", // Свинина
+        "Queso Dip (Mexican Cheese Dip)": "https://images.unsplash.com/photo-1638992147921-f054a9829b96?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", // Сирний соус
+        "Tom Yum Soup (Thai Soup)": "https://images.unsplash.com/photo-1777828827870-92e3069424bd?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", // Том Ям
+        "Rotisserie Flavoured Chicken and Potato Bake & a Giveaway!": "https://images.unsplash.com/photo-1714683237282-4a4623333058?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", // Курка запечена
+        "Salisbury Steak with Mushroom Gravy": "https://images.unsplash.com/photo-1675969108138-6a181885b105?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", // Стейк
+        "Japanese Salmon with Mirin and Soy Sauce": "https://images.unsplash.com/photo-1585610880923-e886dfb0bb72?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", // Лосось японський
+        "Chili Con Carne Corn Bread Pie": "https://images.unsplash.com/photo-1551807501-9263ed1942d8?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", // Чилі
+        "Lamb Koftas with Yoghurt Dressing": "https://images.unsplash.com/photo-1520218508822-998633d997e6?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", // Кофта
+        "Browned Butter Garlic Prawns with Cauliflower Puree": "https://images.unsplash.com/photo-1751641676715-db06bb0f2ad8?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", // Креветки
+        "Easy French Onion Soup Dip": "https://images.unsplash.com/photo-1561954467-e8e85546d360?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" // Цибулевий суп
+    };
+
+
+        function getRecipeImage(recipe) {
+            if (recipe.image) return recipe.image;
+
+            const cleanTitle = recipe.title.replace(/&amp;/g, '&');
+            if (imageFallback[cleanTitle]) return imageFallback[cleanTitle];
+            recipe.image = imageUrl;
+
+            const cat = detectCategory(recipe);
+            if (categoryImages[cat]) return categoryImages[cat];
+        
+            return 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=700';
+        }
+
+        const imageUrl = recipe.image || imageFallback[recipe.title.replace(/&amp;/g, '&')] || 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=700';
+        
+        const isLiked = likedRecipeTitles.has(recipe.title);
+        const heartClass = isLiked ? 'active-like' : '';
+        const fill = isLiked ? '#e74c3c' : 'none';
+        const stroke = isLiked ? '#e74c3c' : 'currentColor';
 
         return `
-            <div class="recipe-card" data-categories="${category}" data-index="${index}">
-                <div class="recipe-image-box">
-                    <img src="${image}" alt="${recipe.title}">
-                    <div class="like-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg></div>
+            <div class="recipe-card-new" data-index="${index}" style="background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); display: flex; flex-direction: column; position: relative;">
+                
+                <div class="like-circle ${heartClass}" style="position: absolute; top: 10px; right: 10px; background: white; border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 2;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="${fill}" stroke="${stroke}" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                 </div>
-                <div class="recipe-content">
-                    <span class="recipe-tag">${category.charAt(0).toUpperCase() + category.slice(1)}</span>
-                    <h3 class="recipe-name">${recipe.title}</h3>
-                    <div class="recipe-calc">
-                        <div class="calc-title">✦ Кулінарні міри</div>
-                        <ul class="calc-list">${ingredientItems || '<li><span>Інгредієнти невідомі</span><span>—</span></li>'}</ul>
+
+                <div style="height: 180px;">
+                    <img src="${imageUrl}" alt="${recipe.title}" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+                
+                <div style="padding: 15px; display: flex; flex-direction: column; flex-grow: 1;">
+                    <h3 style="margin: 0 0 10px 0; font-size: 18px;">${recipe.title}</h3>
+                    <div style="margin-top: auto; display: flex; gap: 10px;">
+                        <button class="card-btn btn-delete" style="flex: 1; background: #ffebee; color: #d32f2f; border: none; padding: 10px; border-radius: 8px; cursor: pointer;">Видалити</button>
+                        <button class="card-btn btn-open" style="flex: 1; background: var(--accent-olive); color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer;">Всередину</button>
                     </div>
-                    <div class="recipe-meta">${timeText}</div>
                 </div>
             </div>
         `;
     }
 
     function openRecipeModal(recipe) {
-        const category = detectCategory(recipe);
-        modalImg.src = recipe.image || categoryImages[category] || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=700';
-        modalImg.alt = recipe.title;
-        modalTitle.textContent = recipe.title;
-        modalTag.textContent = category.charAt(0).toUpperCase() + category.slice(1);
-        modalTimeText.textContent = `${recipe.prep_time || 0} хв підготовки · ${recipe.cook_time || 0} хв приготування`;
+        currentActiveRecipe = recipe;
 
-        modalIngredients.innerHTML = (recipe.ingredients || []).map(item => {
-            const quantity = item.quantity !== null && item.quantity !== undefined ? item.quantity : '';
-            const unit = item.unit ? ` ${item.unit}` : '';
-            const notes = item.notes ? ` ${item.notes}` : '';
-            return `<li><span>${item.name}</span><span>${quantity}${unit}${notes}</span></li>`;
-        }).join('') || '<li>Інгредієнти зараз недоступні</li>';
+        document.getElementById('modalRecipeTitle').textContent = recipe.title;
 
-        if (Array.isArray(recipe.instructions) && recipe.instructions.length > 0) {
-            modalSteps.textContent = recipe.instructions.filter(Boolean).join(' ');
-        } else {
-            modalSteps.textContent = 'Детальні кроки приготування будуть додані найближчим часом.';
+        const modalTimeText = document.getElementById('modalRecipeTimeText');
+        if (modalTimeText) {
+            modalTimeText.textContent = recipe.total_time ? recipe.total_time + ' хв' : 'Час не вказано';
         }
+
+        const imageFallback = {
+            "Smoked Salmon and Egg Breakfast Mille-feuille": "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=700",
+            "Middle Eastern Roasted Eggplant with Couscous": "https://media.istockphoto.com/id/2233296510/photo/stuffed-eggplant-with-couscous.webp?a=1&b=1&s=612x612&w=0&k=20&c=FaEbKo2_oIc-GJ4ZCrtV5KFBY-hAzgTTz8XN-iM1Cgg=",
+            "Chorizo & Kale Risotto": "https://images.unsplash.com/photo-1575401449875-b695a38ef896?q=80&w=1010&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+            "Ultra Crispy Smashed Potatoes": "https://images.unsplash.com/photo-1633959639799-6d3f66e05710?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+            "Cheese and Bacon Potato Skins": "https://images.unsplash.com/photo-1595955538897-d3c8ec58efe2?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+            "One Pot Chicken Enchilada Rice Casserole": "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=700",
+            "Smoked Salmon Potato Rosti Stack": "https://plus.unsplash.com/premium_photo-1697032903231-b9c702d816f5?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+            "Mexican Shredded Beef (and Tacos)": "https://plus.unsplash.com/premium_photo-1661730329741-b3bf77019b39?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+            "Hawaiian Chicken Salad": "https://plus.unsplash.com/premium_photo-1695399566183-df3e7778e198?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+            "Glazed Stovetop Carrots": "https://images.unsplash.com/photo-1636743716922-1884c23fb6f6?q=80&w=685&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+            "Smoked Trout Dip / Potted Smoked Trout (le Budget le Gourmet)": "https://images.unsplash.com/photo-1695605302524-e6dd509cb170?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+            "Slow-Roasted Crispy Pork Belly": "https://images.unsplash.com/photo-1625477811233-044633d10dd1?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+            "Queso Dip (Mexican Cheese Dip)": "https://images.unsplash.com/photo-1638992147921-f054a9829b96?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+            "Tom Yum Soup (Thai Soup)": "https://images.unsplash.com/photo-1777828827870-92e3069424bd?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+            "Rotisserie Flavoured Chicken and Potato Bake & a Giveaway!": "https://images.unsplash.com/photo-1714683237282-4a4623333058?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+            "Salisbury Steak with Mushroom Gravy": "https://images.unsplash.com/photo-1675969108138-6a181885b105?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+            "Japanese Salmon with Mirin and Soy Sauce": "https://images.unsplash.com/photo-1585610880923-e886dfb0bb72?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+            "Chili Con Carne Corn Bread Pie": "https://images.unsplash.com/photo-1551807501-9263ed1942d8?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+            "Lamb Koftas with Yoghurt Dressing": "https://images.unsplash.com/photo-1520218508822-998633d997e6?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+            "Browned Butter Garlic Prawns with Cauliflower Puree": "https://images.unsplash.com/photo-1751641676715-db06bb0f2ad8?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+            "Easy French Onion Soup Dip": "https://images.unsplash.com/photo-1561954467-e8e85546d360?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+        };
+        const cleanTitle = recipe.title.replace(/&amp;/g, '&');
+        const finalImageUrl = recipe.image || imageFallback[cleanTitle] || 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=700';
+
+        const modalImg = document.getElementById('modalRecipeImg');
+        if (modalImg) modalImg.src = finalImageUrl;
+        
+        const modalTag = document.getElementById('modalRecipeTag');
+        if (modalTag) modalTag.textContent = detectCategory(recipe);
+
+
+
+        const stepsContainer = document.getElementById('modalRecipeSteps');
+        stepsContainer.innerHTML = recipe.instructions && recipe.instructions.length
+            ? recipe.instructions.filter(Boolean).join('<br><br>')
+            : 'Інструкція буде додана пізніше.';
+
+        const slider = document.getElementById('modal-portion-slider');
+        const sliderVal = document.getElementById('modal-portion-val');
+        
+        if (slider && sliderVal) {
+            slider.value = 1;
+            sliderVal.textContent = "1";
+        }
+
+        calculateIngredients(1);
 
         recipeModal.style.display = 'flex';
         document.body.style.overflow = 'hidden';
+    }
+
+    function calculateIngredients(desiredPortions) {
+        if (!currentActiveRecipe) return;
+        const list = document.getElementById('modalRecipeIngredients');
+        list.innerHTML = '';
+    
+        const baseServings = currentActiveRecipe.servings || 1;
+        const multiplier = desiredPortions / baseServings;
+
+        (currentActiveRecipe.ingredients || []).forEach(ing => {
+            let newQuantity = '';
+        if (ing.quantity) {
+            let calc = ing.quantity * multiplier;
+            newQuantity = Number(calc.toFixed(1)).toString(); 
+        }
+        
+            const unit = ing.unit ? ` ${ing.unit}` : '';
+            const notes = ing.notes ? ` <i>(${ing.notes})</i>` : '';
+        
+            list.innerHTML += `<li style="padding: 8px 0; border-bottom: 1px solid rgba(0,0,0,0.05); font-size: 14px; display: flex; justify-content: space-between;">
+                <span style="font-weight: 600; color: var(--accent-olive);">${newQuantity}${unit}</span>
+                <span style="text-align: right;">${ing.name}${notes}</span>
+            </li>`;
+        });
     }
 
     function saveToHistory(recipe) {
@@ -306,7 +414,7 @@ function getFilterKey(rawText) {
         }
         historyList.innerHTML = history.map(item => `
             <div class="history-item">
-                <img src="${item.img || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=200'}" alt="${item.title}">
+                <img src="${item.img || 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=700'}" alt="${item.title}">
                 <div class="history-item-title">${item.title}</div>
             </div>
         `).join('');
@@ -409,7 +517,7 @@ function getFilterKey(rawText) {
         if (filterKey === 'collections') {
             return filterRecipe(recipe, 'holiday') || filterRecipe(recipe, 'seasonal') || filterRecipe(recipe, 'quickDinner') || filterRecipe(recipe, 'worldCuisine');
         }
-if (filterKey === 'holiday') {
+        if (filterKey === 'holiday') {
             return containsAny(searchSource, ['holiday', 'festive', 'christmas', 'thanksgiving', 'easter', 'celebration', 'святков', 'різдвян']);
         }
         if (filterKey === 'seasonal') {
@@ -438,13 +546,14 @@ if (filterKey === 'holiday') {
 
                 const matchesFilter = filterRecipe(recipe, currentFilter);
                 const matchesSearch = !searchTerm || searchSource.includes(searchTerm);
-                return matchesFilter && matchesSearch;
+                const matchesLikes = !showLikedOnly || likedRecipeTitles.has(recipe.title);
+                return matchesFilter && matchesSearch && matchesLikes;
             });
     }
 
     function renderRecipes(resetCount = false) {
         const filtered = buildFilteredRecipes();
-        if (resetCount) displayedCount = 8;
+        if (resetCount) displayedCount = 30;
         const visible = filtered.slice(0, displayedCount);
 
         if (!visible.length) {
@@ -471,24 +580,51 @@ if (filterKey === 'holiday') {
     }
 
     function attachCardEvents() {
-        document.querySelectorAll('.recipe-card').forEach(card => {
-            card.addEventListener('click', event => {
-                if (event.target.closest('.like-circle')) return;
-                const recipeIndex = Number(card.dataset.index);
-                const recipe = recipes[recipeIndex];
-                if (!recipe) return;
-                saveToHistory(recipe);
-                openRecipeModal(recipe);
-            });
-        });
+        document.querySelectorAll('.recipe-card-new').forEach(card => {
+            const recipeIndex = Number(card.dataset.index);
+            const recipe = recipes[recipeIndex];
 
-        document.querySelectorAll('.like-circle').forEach(button => {
-            button.addEventListener('click', event => {
-                event.preventDefault();
-                event.stopPropagation();
-                button.classList.toggle('liked');
-                applyFilters();
-            });
+            const btnOpen = card.querySelector('.btn-open');
+            if (btnOpen) {
+                btnOpen.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    recipe.image = card.querySelector('img').src;
+                    saveToHistory(recipe);
+                    openRecipeModal(recipe);
+                });
+            }
+
+            const btnDelete = card.querySelector('.btn-delete');
+            if (btnDelete) {
+                btnDelete.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    card.remove();
+                });
+            }
+
+            const btnLike = card.querySelector('.like-circle');
+            if (btnLike) {
+                btnLike.style.cursor = 'pointer';
+                
+                btnLike.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    btnLike.classList.toggle('active-like');
+                    
+                    const svg = btnLike.querySelector('svg');
+                    
+                    if (btnLike.classList.contains('active-like')) {
+                        likedRecipeTitles.add(recipe.title);
+                        svg.style.fill = '#e74c3c';
+                        svg.style.stroke = '#e74c3c';
+                    } else {
+                        likedRecipeTitles.delete(recipe.title);
+                        svg.style.fill = 'none';
+                        svg.style.stroke = 'currentColor';
+                    }
+                    
+                    localStorage.setItem('graziaLikes', JSON.stringify([...likedRecipeTitles]));
+                });
+            }
         });
     }
 
@@ -504,6 +640,14 @@ if (filterKey === 'holiday') {
     }
 
     function setupEvents() {
+        if (headerLikeBtn) {
+            headerLikeBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                showLikedOnly = !showLikedOnly;
+                headerLikeBtn.style.color = showLikedOnly ? '#e74c3c' : '';
+                renderRecipes(true);
+            });
+        }
         filterLinks.forEach(link => link.addEventListener('click', event => {
             event.preventDefault();
             handleFilters.call(link);
@@ -517,6 +661,10 @@ if (filterKey === 'holiday') {
         }
 
         if (searchInput) {
+            searchInput.addEventListener('input', () => {
+                renderRecipes(true);
+            });
+            
             searchInput.addEventListener('keydown', event => {
                 if (event.key === 'Enter') {
                     event.preventDefault();
@@ -527,7 +675,7 @@ if (filterKey === 'holiday') {
 
         if (loadMoreBtn) {
             loadMoreBtn.addEventListener('click', () => {
-                displayedCount += 8;
+                displayedCount += 30;
                 renderRecipes();
             });
         }
@@ -630,8 +778,63 @@ if (filterKey === 'holiday') {
                 toggleAuthMode.textContent = isLoginMode ? 'Увійти' : 'Зареєструватися';
             });
         }
+        const portionSlider = document.getElementById('modal-portion-slider');
+        if (portionSlider) {
+            portionSlider.addEventListener('input', (e) => {
+                const val = e.target.value;
+                document.getElementById('modal-portion-val').textContent = val;
+                calculateIngredients(val);
+            });
+        }
+
+    const parseBtn = document.getElementById('parse-url-btn');
+    const urlInput = document.getElementById('parse-url-input');
+    const parseMsg = document.getElementById('parse-message');
+
+    if (parseBtn && urlInput && parseMsg) {
+        parseBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetUrl = urlInput.value.trim();
+            parseMsg.style.display = 'block';
+
+            if (!targetUrl) {
+                parseMsg.style.color = '#e74c3c';
+                parseMsg.textContent = "Помилка: Вставте посилання на рецепт у поле!";
+                return;
+            }
+
+            if (!targetUrl.startsWith('http')) {
+                parseMsg.style.color = '#e74c3c';
+                parseMsg.textContent = "Помилка: Невірний формат посилання.";
+                return;
+            }
+
+            parseBtn.innerText = "Парсинг...";
+            parseMsg.style.color = 'var(--text-dark)';
+            parseMsg.textContent = "Зв'язок із сервером... Аналізуємо рецепт...";
+
+            setTimeout(() => {
+                parseBtn.innerText = "Пошук";
+                parseMsg.style.color = '#e74c3c';
+                parseMsg.textContent = "Помилка: рецепт не знайдено.";
+                
+                setTimeout(() => {
+                    parseMsg.style.display = 'none';
+                }, 5000);
+            }, 2000);
+        });
+    }
+
+        const loadDbBtn = document.getElementById('parse-predefined-btn');
+        if (loadDbBtn) {
+            loadDbBtn.addEventListener('click', () => {
+                loadDbBtn.innerText = "Завантаження...";
+                loadRecipes().then(() => {
+                    loadDbBtn.innerText = "Завантажити із заготованих адрес";
+                });
+            });
+        }
     }
 
     setupEvents();
-    loadRecipes();
-});
+    });
