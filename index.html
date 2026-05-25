@@ -61,9 +61,8 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                 </button>
 
-                <button class="icon-btn" id="profileBtn" title="Особистий кабінет">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                </button>
+                <button class="icon-btn" id="profileBtn" title="Особистий кабінет" style="display: none;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" ...
                 <button class="mobile-menu-btn">☰</button>
             </div>
         </div>
@@ -85,6 +84,18 @@
                     </div>
                 </div>
             </div>
+            <div class="parser-controls" style="margin-top: 20px; display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; gap: 10px;">
+        <input type="url" id="parse-url-input" placeholder="Додати URL рецепту..." style="flex: 1; padding: 12px 20px; border-radius: 30px; border: 1px solid var(--accent-gold); outline: none; font-family: 'Montserrat', sans-serif;">
+        <button id="parse-url-btn" class="search-btn">Пошук</button>
+    </div>
+    <p id="parse-message" style="color: #e74c3c; font-size: 14px; text-align: center; margin-top: 10px; display: none; font-weight: 600;"></p>
+    
+
+    <button id="parse-predefined-btn" class="btn-outline" style="width: 100%; justify-content: center; background: var(--white);">
+        Завантажити із заготованих адрес
+    </button>
+</div>
         </section>
 
         <section class="categories">
@@ -135,6 +146,10 @@
             </div>
         </section>
 
+<script>
+    
+</script>
+
         <section>
             <div class="section-header">
                 <h2 class="section-title">Популярні рецепти</h2>
@@ -144,7 +159,7 @@
             
             <div class="btn-center-wrapper">
                 <button class="btn-outline" id="loadMoreBtn">
-                    Показати ще 
+                    Показати ще
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"></path></svg>
                 </button>
             </div>
@@ -180,7 +195,7 @@
                 <button type="submit" class="modal-btn" id="authSubmitBtn">Увійти</button>
             </form>
             <p style="margin-top: 20px; font-size: 12px; color: var(--text-gray);">
-                <span id="authHintText">Немає акаунту?</span> 
+                <span id="authHintText">Немає акаунту?</span>
                 <a href="#" id="toggleAuthMode" style="color: var(--accent-olive); font-weight: 600; text-decoration: none;">Зареєструватися</a>
             </p>
         </div>
@@ -213,14 +228,22 @@
                 </div>
             </div>
 
-            <div class="recipe-modal-body">
-                <h4>Інгредієнти:</h4>
-                <ul id="modalRecipeIngredients"></ul>
-
-                <h4>Покрокове приготування:</h4>
-                <p id="modalRecipeSteps"></p>
-            </div>
+    <div class="recipe-modal-body">
+        <div class="slider-container" style="margin-bottom: 25px; background: var(--bg-secondary); padding: 15px; border-radius: 15px; text-align: center;">
+            <label for="modal-portion-slider" style="display: block; margin-bottom: 10px; font-weight: 700; color: var(--text-dark);">
+                Кількість порцій: <span id="modal-portion-val" style="color: var(--accent-olive); font-size: 20px;">1</span>
+            </label>
+            <input type="range" id="modal-portion-slider" class="grazia-slider" min="1" max="12" value="1">
         </div>
+
+        <h4 style="color: var(--accent-olive); margin-bottom: 15px; font-family: 'Playfair Display', serif; font-size: 20px;">Інгредієнти:</h4>
+        <ul id="modalRecipeIngredients" style="list-style-type: none; margin-bottom: 25px;"></ul>
+
+        <hr style="margin: 25px 0; border: none; border-top: 1px dashed var(--accent-gold); opacity: 0.5;">
+
+        <h4 style="color: var(--accent-olive); margin-bottom: 15px; font-family: 'Playfair Display', serif; font-size: 20px;">Спосіб приготування:</h4>
+        <p id="modalRecipeSteps" style="font-size: 14px; line-height: 1.8; color: var(--text-dark);"></p>
+
     </div>
 
     <script src="script.js"></script>
@@ -228,8 +251,8 @@
     <script type="text/javascript">
     function googleTranslateElementInit() {
         new google.translate.TranslateElement({
-            pageLanguage: 'en', 
-            includedLanguages: 'uk', 
+            pageLanguage: 'en',
+            includedLanguages: 'uk',
             layout: google.translate.TranslateElement.InlineLayout.SIMPLE
         }, 'google_translate_element');
     }
